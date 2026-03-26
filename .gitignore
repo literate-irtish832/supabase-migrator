@@ -1,0 +1,5 @@
+.env
+dump/
+storage_tmp/
+*.log
+.DS_Store
